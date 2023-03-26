@@ -1,0 +1,198 @@
+<?php
+include 'inc/head.php';
+include '../config/db_connect.php';
+include './scripts/functions.php';
+
+if (isset($_SESSION['update-id'])) {
+
+    if (isset($_SESSION['admin']['user_name'])) {
+        $email = base64_decode($_SESSION['admin']['user_name']);
+
+        $updated_on = date('d-m-y h:i:s');
+
+        $query = "SELECT * from admin_table WHERE email = '$email'";
+
+        $result = mysqli_query($conn, $query);
+
+        $data = mysqli_fetch_array($result, MYSQLI_ASSOC);
+
+        $target_dir = "uploads/subcategory/";
+
+        // print_r($data);
+
+        /* show all categories */
+        $subcat_to_update_id = $_SESSION['update-id'];
+        $cat_query = "select id,name from categories";
+        $cat_query_result = mysqli_query($conn, $cat_query);
+        $cat_names = mysqli_fetch_all($cat_query_result, MYSQLI_ASSOC);
+        /*end*/
+
+        /* show current subcat name and image*/
+        $query = "select * from subcategory where id ='$subcat_to_update_id'";
+        $result = mysqli_query($conn, $query);
+        $subcat_data = mysqli_fetch_assoc($result);
+
+        /* getting name of parent category*/
+        $tmp = $subcat_data['category_id'];
+        $query = "select name from categories where id = '$tmp'";
+        $result = mysqli_query($conn,$query);
+        $parent = mysqli_fetch_assoc($result);
+
+        $image = $subcategory = $parent_cat = '';
+        if (isset($_POST['submit'])) {
+            $errors = array('subcategory' => '', 'image' => '');
+            $subcategory = trim(mysqli_real_escape_string($conn, $_POST['subcategory']));
+            if (empty($subcategory)) {
+                $errors['subcategory'] = "Name cannot be empty";
+            }
+            $parent_cat = mysqli_real_escape_string($conn, $_POST['parent-cat']);
+            // $image_name = image_checker($image,$errors);
+            $allowed_extensions = array('jpg', 'jpeg', 'png');
+            $image_name = $_FILES["images"]["name"];
+            $temp_image_name = explode(".", $image_name);
+            $ext = end($temp_image_name);
+
+            //echo $image_name . " " . $ext;
+
+            if (!in_array($ext, $allowed_extensions)) {
+                $errors['image'] = "Only jpg,jpeg,png images are allowed";
+                // print_r($errors);
+            } else {
+                if ($_FILES["images"]["size"] > 1048576) {
+                    $errors['image'] = "file size too large";
+                    // echo "too large";
+                } else {
+                    $image = uniqid("img_") . "." . $ext;
+                }
+            }
+
+            // echo "image is : $image_name <br>";
+            if (!array_filter($errors)) {
+                if (move_uploaded_file($_FILES["images"]["tmp_name"], $target_dir . $image)) {
+                    $sql = "update subcategory set name = '$subcategory',image = '$image',category_id='$parent_cat', updated_on = '$updated_on' where id = '$subcat_to_update_id' ";
+
+                    if (mysqli_query($conn, $sql)) {
+                        // echo $sql;
+                        echo "<script type='text/javascript'>addStatusMessage('success','Category has been added sucessfully'); </script>";
+                        // exit;
+                        unset($_SESSION['update-id']);
+                        header("location: view-category.php");
+                    } else {
+                        echo mysqli_errno($conn);
+                    }
+                }
+            }
+        }
+    } else {
+        header("location: login.php");
+    }
+} else {
+    echo "cannot access this page";
+    header("location: view-category.php");
+}
+
+?>
+
+<body class="dashboard dashboard_2">
+    <div class="full_container">
+        <div class="inner_container">
+            <!-- Sidebar  -->
+            <?php include 'inc/sidebar.php'; ?>
+            <!-- end sidebar -->
+            <!-- right content -->
+            <div id="content">
+                <!-- topbar -->
+                <?php include 'inc/topbar.php'; ?>
+                <!-- end topbar -->
+                <!-- dashboard inner -->
+                <div class="midde_cont">
+                    <div class="container-fluid">
+                        <div class="row column_title">
+                            <div class="col-md-12">
+                                <div class="page_title">
+                                    <h2>Update Subcategory</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add category form  -->
+                        <div class="container">
+                            <div class="center verticle_center full_height">
+                                <div id="error-message-container"></div>
+                                <div class="login-section">
+                                    <div class="login_form">
+                                        <form method="post" action="<?php echo $_SERVER["PHP_SELF"]; ?>" enctype="multipart/form-data">
+                                            <fieldset>
+                                                <div class="field">
+                                                    <label class="label_field">Current Name:</label>
+                                                    <input value="<?php echo $subcat_data['name']; ?>" type="category" name="category" required disabled />
+                                                </div>
+                                                <div class="field">
+                                                    <label class="label_field">New Name:</label>
+                                                    <input type="text" name="subcategory" required />
+                                                </div>
+                                                <div class="field">
+                                                    <label class="label_field">Current parent</label>
+                                                    <input type="text" value="<?php echo $parent['name']?>" disabled>
+                                                </div>
+                                                <div class="field">
+                                                    <label class="label_field">New parent</label>
+                                                    <select name="parent-cat">
+                                                        <?php foreach ($cat_names as $cat_name) : ?>
+                                                            <option value="<?php echo htmlspecialchars($cat_name['id']) ?>"><?php echo htmlspecialchars($cat_name['name']) ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <div class="field">
+                                                    <label class="label_field">Current Image:</label>
+                                                    <img width="100" src="uploads/subcategory/<?php echo $subcat_data['image'] ?>" alt="" class="rounded-circle">
+                                                </div>
+                                                <div class="field">
+                                                    <label class="label_field">New Image:</label>
+                                                    <input type="file" name="images" accept="image/*" required />
+                                                </div>
+
+                                                <div class="field margin_0">
+                                                    <!-- <label class="label_field hidden">hidden label</label> -->
+                                                    <button class="main_bt" name="submit">Update</button>
+                                                </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- footer -->
+                        <?php include 'inc/footer.php'; ?>
+                        <!-- end dashboard inner -->
+                    </div>
+                </div>
+            </div>
+            <!-- jQuery -->
+            <script src="js/jquery.min.js"></script>
+            <script src="js/popper.min.js"></script>
+            <script src="js/bootstrap.min.js"></script>
+            <!-- wow animation -->
+            <script src="js/animate.js"></script>
+            <!-- select country -->
+            <script src="js/bootstrap-select.js"></script>
+            <!-- owl carousel -->
+            <script src="js/owl.carousel.js"></script>
+            <!-- chart js -->
+            <script src="js/Chart.min.js"></script>
+            <script src="js/Chart.bundle.min.js"></script>
+            <script src="js/utils.js"></script>
+            <script src="js/analyser.js"></script>
+            <!-- nice scrollbar -->
+            <script src="js/perfect-scrollbar.min.js"></script>
+            <script>
+                var ps = new PerfectScrollbar('#sidebar');
+            </script>
+            <!-- custom js -->
+            <script src="js/custom.js"></script>
+            <script src="js/chart_custom_style2.js"></script>
+
+            <script src="./scripts/functions.js"></script>
+</body>
+
+</html>
