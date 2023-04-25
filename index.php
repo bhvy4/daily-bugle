@@ -24,7 +24,7 @@ $slider_result = mysqli_query($conn, $category_news_sql);
 
 
 <!-- Featured News Slider Start -->
-<?php include 'inc/featured-news.php'; ?>
+<!-- <?php include 'inc/featured-news.php'; ?> -->
 <!-- Featured News Slider End -->
 
 
@@ -45,22 +45,23 @@ $slider_result = mysqli_query($conn, $category_news_sql);
                         while ($news_slider_row = mysqli_fetch_array($slider_content_result)) :
                         ?>
                             <div class="position-relative">
-                                <img class="img-fluid w-100" src="admin/uploads/news/<?=$news_slider_row['images']?>" style="object-fit: cover;">
+                                <img class="img-fluid w-100" src="admin/uploads/news/<?= $news_slider_row['images'] ?>" style="object-fit: cover;">
                                 <div class="overlay position-relative bg-light">
                                     <div class="mb-2" style="font-size: 13px;">
                                         <a href=""><?= $cat_row['name'] ?></a>
                                         <span class="px-1">/</span>
-                                        <span><?php $date_arr = explode(' ',$news_slider_row['updated_on']); echo $date_arr[0]; ?></span>
+                                        <span><?php $date_arr = explode(' ', $news_slider_row['updated_on']);
+                                                echo $date_arr[0]; ?></span>
                                     </div>
-                                    <a class="h4 m-0" href="single.php?id=<?=$news_slider_row['n_id']?>"><?= $news_slider_row['title'] ?></a>
+                                    <a class="h4 m-0" href="single.php?id=<?= $news_slider_row['n_id'] ?>"><?= $news_slider_row['title'] ?></a>
                                 </div>
                             </div>
                         <?php endwhile; ?>
-                        
+
                     </div>
                 </div>
             <?php endwhile; ?>
-            
+
         </div>
     </div>
 </div>
@@ -85,36 +86,36 @@ $slider_result = mysqli_query($conn, $category_news_sql);
         <div class="row">
             <div class="col-lg-8">
                 <!-- popular news slider -->
-                <?php include 'inc/popular-news-slider.php' ?>
+                <!-- <?php include 'inc/popular-news-slider.php' ?> -->
 
                 <div class="mb-3 pb-3">
                     <a href=""><img class="img-fluid w-100" src="img/ads-700x70.jpg" alt=""></a>
                 </div>
                 <!-- latest news slider -->
-                <?php include 'inc/latest-news-slider.php' ?>
+                <!-- <?php include 'inc/latest-news-slider.php' ?> -->
             </div>
 
             <div class="col-lg-4 pt-3 pt-lg-0">
                 <!-- Social Follow Start -->
-                <?php include 'inc/social-follows.php'; ?>
+                <!-- <?php include 'inc/social-follows.php'; ?> -->
                 <!-- Social Follow End -->
 
                 <!-- Newsletter Start -->
-                <?php include 'inc/newsletter.php'; ?>
+                <!-- <?php include 'inc/newsletter.php'; ?> -->
                 <!-- Newsletter End -->
 
                 <!-- Ads Start -->
-                <div class="mb-3 pb-3">
+                <!-- <div class="mb-3 pb-3">
                     <a href=""><img class="img-fluid" src="img/news-500x280-4.jpg" alt=""></a>
-                </div>
+                </div> -->
                 <!-- Ads End -->
 
                 <!-- Popular News Start -->
-                <?php include 'inc/popular-news.php'; ?>
+                <!-- <?php include 'inc/popular-news.php'; ?> -->
                 <!-- Popular News End -->
 
                 <!-- Tags Start -->
-                <?php include 'inc/tags.php'; ?>
+                <!-- <?php include 'inc/tags.php'; ?> -->
                 <!-- Tags End -->
             </div>
         </div>
